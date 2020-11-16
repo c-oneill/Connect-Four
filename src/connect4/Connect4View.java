@@ -61,10 +61,18 @@ public class Connect4View extends Application implements Observer{
         
     }
 
+    /**
+     * <ul><b><i>init</i></b></ul>
+     * <ul><ul><p><code> private void init () </code></p></ul>
+     *
+     * This method initializes the scene elements and adds them to the scene
+     *
+     * @param stage
+     */
     private void init(Stage stage) {
         initBoard();
-        
-        //TODO add board to scene
+        createCircles();
+        this.scene = new Scene(board);
     }
     
     /**
@@ -87,10 +95,6 @@ public class Connect4View extends Application implements Observer{
         board.setVgap(VGAP_PADDING);
         board.setPadding(new Insets(INSETS_PADDING, INSETS_PADDING, INSETS_PADDING, INSETS_PADDING));
         board.setAlignment(Pos.CENTER);
-        
-        this.scene = new Scene(board);
-        
-        createCircles();
     }
     
     /**
@@ -110,6 +114,14 @@ public class Connect4View extends Application implements Observer{
         }
     }
     
+    /**
+     * <ul><b><i>checkWin</i></b></ul>
+     * <ul><ul><p><code> private void checkWin () </code></p></ul>
+     *
+     * Checks with the {@link Connect4Controller} for a winning condition
+     * and displays an alert box in that event.
+     *
+     */
     private void checkWin() {
         boolean hasWon = false;
         
