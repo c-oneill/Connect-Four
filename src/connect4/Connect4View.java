@@ -62,6 +62,7 @@ public class Connect4View extends Application implements Observer{
             stage.setScene(scene);
             stage.show();
 
+
         }catch(Exception e) {
             e.printStackTrace();
         }
@@ -72,7 +73,7 @@ public class Connect4View extends Application implements Observer{
      * <ul><b><i>init</i></b></ul>
      * <ul><ul><p><code> private void init () </code></p></ul>
      *
-     * This method initializes the scene elements and adds them to the scene
+     * This method initializes the scene elements and adds them to the scene.
      *
      * @param stage
      */
@@ -84,6 +85,13 @@ public class Connect4View extends Application implements Observer{
         this.scene = new Scene(window);
     }
     
+    /**
+     * <ul><b><i>initMenuBar</i></b></ul>
+     * <ul><ul><p><code>private void initMenuBar () </code></p></ul>
+     *
+     * Sets up the menu bar and associated menu options.
+     *
+     */
     private void initMenuBar() {
         menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
@@ -94,7 +102,14 @@ public class Connect4View extends Application implements Observer{
     }
     
     private void startNewGame() {
-        //TODO add new game dialog (Network Setup)
+        Connect4NetworkSetup ns = new Connect4NetworkSetup();
+        ns.showAndWait();
+        
+        //System.out.printf("Okay button hit: %b\n", ns.userHitOK());
+        //System.out.printf("Server selected: %b\n", ns.getCreateModeSelection());
+        //System.out.printf("Human selected: %b\n", ns.getPlayAsSelection());
+        
+      //TODO get info from Network Setup dialog and use it
     }
     
     /**
@@ -131,22 +146,21 @@ public class Connect4View extends Application implements Observer{
      * @param xCoord - the x-coordinate of the mouse cursor location on click
      */
     private void onClick(double xCoord) {
-        int position = (int) Math.ceil(xCoord);
-        int column = (position - 5) / (HGAP_PADDING + 2 * CIRCLE_RADIUS);
-        column = (column >= COLUMNS) ? COLUMNS - 1 : column; 
-        //System.out.printf("Mouse x = %.1f \tPosition = %d \t Column = %d\n", xCoord, position, column);
+        int position = (int) Math.ceil(xCoord); // Rounding up decimal to nearest integer
+        int column = (position - 5) / (HGAP_PADDING + 2 * CIRCLE_RADIUS); // Calculating column based on column width
+        column = (column >= COLUMNS) ? COLUMNS - 1 : column; // limiting to last column
         selectColumn(column);
     }
     
     /**
      * <ul><b><i>selectColumn</i></b></ul>
-     * <ul><ul><p><code> void selectColumn () </code></p></ul>
+     * <ul><ul><p><code>private void selectColumn (int column) </code></p></ul>
      *
      * Checks selected column for valid move and performs move, if available.
      *
-     * @param col
+     * @param column - the column selected to perform a move on
      */
-    private void selectColumn(int col) {
+    private void selectColumn(int column) {
         boolean columnFull = false;
         
         //TODO check for full column
