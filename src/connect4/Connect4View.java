@@ -10,6 +10,8 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.*;
 import javafx.geometry.*;
 import javafx.scene.shape.Circle;
+import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 
 /**
  * This class serves as the UI for the Connect4 program.
@@ -26,13 +28,17 @@ public class Connect4View extends Application implements Observer{
     private final int CIRCLE_RADIUS = 20;
     private final int VGAP_PADDING = 8;
     private final int HGAP_PADDING = 8;
-    private final int INSETS_PADDING = 8;
+    private final int INSETS_PADDING = 4;
     private final Color BACKGROUND_COLOR = Color.BLUE;
     private final int COLUMNS = 7;
     private final int ROWS = 6;
 
     private Scene scene;
+    private VBox window;
     private GridPane board;
+    private MenuBar menuBar;
+    
+    private boolean inputEnabled;
     
     /* This main function used for unit testing */
     public static void main(String[] args) {
@@ -48,7 +54,8 @@ public class Connect4View extends Application implements Observer{
 
         // Showing stage
         try {
-
+            inputEnabled = true;
+            
             // setting the stage
             stage.setTitle("Connect4");
             stage.setResizable(false);
@@ -72,7 +79,15 @@ public class Connect4View extends Application implements Observer{
     private void init(Stage stage) {
         initBoard();
         createCircles();
-        this.scene = new Scene(board);
+        initMenuBar();
+        this.window = new VBox(menuBar, board);
+        this.scene = new Scene(window);
+    }
+    
+    private void initMenuBar() {
+        menuBar = new MenuBar();
+        Menu fileMenu = new Menu("File");
+        menuBar.getMenus().add(fileMenu);
     }
     
     /**
@@ -95,6 +110,45 @@ public class Connect4View extends Application implements Observer{
         board.setVgap(VGAP_PADDING);
         board.setPadding(new Insets(INSETS_PADDING, INSETS_PADDING, INSETS_PADDING, INSETS_PADDING));
         board.setAlignment(Pos.CENTER);
+        board.setOnMouseClicked(e -> { if(inputEnabled) onClick(e.getX()); } );
+    }
+    
+    /**
+     * <ul><b><i>onClick</i></b></ul>
+     * <ul><ul><p><code>private void onClick (double xCoord) </code></p></ul>
+     *
+     * This method takes the mouse cursor x-coordinate and converts it into the 
+     * appropriate column. Then it invokes the {@link #selectColumn} method to
+     * complete the on click action.
+     *
+     * @param xCoord - the x-coordinate of the mouse cursor location on click
+     */
+    private void onClick(double xCoord) {
+        int position = (int) Math.ceil(xCoord);
+        int column = (position - 5) / (HGAP_PADDING + 2 * CIRCLE_RADIUS);
+        column = (column >= COLUMNS) ? COLUMNS - 1 : column; 
+        //System.out.printf("Mouse x = %.1f \tPosition = %d \t Column = %d\n", xCoord, position, column);
+        selectColumn(column);
+    }
+    
+    /**
+     * <ul><b><i>selectColumn</i></b></ul>
+     * <ul><ul><p><code> void selectColumn () </code></p></ul>
+     *
+     * Checks selected column for valid move and performs move, if available.
+     *
+     * @param col
+     */
+    private void selectColumn(int col) {
+        boolean columnFull = false;
+        
+        //TODO check for full column
+        
+        
+        if(columnFull) {
+            Alert alert = new Alert(AlertType.INFORMATION, "Column full, pick somewhere else!");
+            alert.showAndWait().filter(response -> response == ButtonType.OK);
+        }
     }
     
     /**
@@ -108,30 +162,39 @@ public class Connect4View extends Application implements Observer{
         board.getChildren().clear();
         for(int row = 0; row < ROWS; row++) {
             for(int col = 0; col < COLUMNS; col++) {
-                Circle c = new Circle(CIRCLE_RADIUS, Color.WHITE);
+                Circle c = new Circle(CIRCLE_RADIUS, Color.WHITE);                
                 board.add(c, col, row);
             }
         }
     }
     
     /**
-     * <ul><b><i>checkWin</i></b></ul>
-     * <ul><ul><p><code> private void checkWin () </code></p></ul>
+     * <ul><b><i>checkGameOver</i></b></ul>
+     * <ul><ul><p><code> private void checkGameOver () </code></p></ul>
      *
-     * Checks with the {@link Connect4Controller} for a winning condition
+     * Checks with the {@link Connect4Controller} for a game over condition
      * and displays an alert box in that event.
      *
      */
-    private void checkWin() {
+    private void checkGameOver() {
+        boolean isGameOver = false;
         boolean hasWon = false;
-        
-        //TODO check with controller for win condition
-        
-        if(hasWon) {
-            //TODO show alert
+        //TODO check with controller for win/loss condition
+        //TODO set win flag if won
+        if(isGameOver) {
+            String msg = "You lost!";
+            if(hasWon)
+                msg = "You won!";
+            Alert alert = new Alert(AlertType.INFORMATION, msg);
+            alert.showAndWait().filter(response -> response == ButtonType.OK);
+
         }
         
     }
+    
+    
+    
+    
     
     /**
      * <ul><b><i>update</i></b></ul>
