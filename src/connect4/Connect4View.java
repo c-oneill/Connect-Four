@@ -87,7 +87,14 @@ public class Connect4View extends Application implements Observer{
     private void initMenuBar() {
         menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
+        MenuItem newGame = new MenuItem("New Game");
+        newGame.setOnAction(e -> { startNewGame(); });
+        fileMenu.getItems().add(newGame);
         menuBar.getMenus().add(fileMenu);
+    }
+    
+    private void startNewGame() {
+        //TODO add new game dialog (Network Setup)
     }
     
     /**
