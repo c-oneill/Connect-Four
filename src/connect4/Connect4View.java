@@ -37,25 +37,35 @@ public class Connect4View extends Application implements Observer{
     private VBox window;
     private GridPane board;
     private MenuBar menuBar;
+    private Connect4Controller controller;
     
     private boolean inputEnabled;
+    private String server;
+    private int port;
+    private boolean isServer;
+    private boolean isHuman;
     
-    /* This main function used for unit testing */
-    public static void main(String[] args) {
-        launch(args);
-    }
-    /* **************************************** */
-    
+    /**
+     * <ul><b><i>start</i></b></ul>
+     * <ul><ul><p><code>public void start (Stage stage) </code></p></ul>
+     *
+     * The main entry point for all JavaFX applications.The start method is called after 
+     * the init method has returned,and after the system is ready for the application to begin running. 
+     *
+     * @param stage - the primary stage for this application, onto whichthe application scene can be set.
+     * 
+     * @author Kristopher Rangel
+     */
     @Override
     public void start(Stage stage) {
 
-        // Initialization 
-        init(stage);
-
+        this.controller = new Connect4Controller();
+        this.scene = new Scene(window);
+        
         // Showing stage
         try {
             inputEnabled = true;
-            
+ 
             // setting the stage
             stage.setTitle("Connect4");
             stage.setResizable(false);
@@ -71,18 +81,38 @@ public class Connect4View extends Application implements Observer{
 
     /**
      * <ul><b><i>init</i></b></ul>
-     * <ul><ul><p><code> private void init () </code></p></ul>
+     * <ul><ul><p><code>public void init () </code></p></ul>
      *
-     * This method initializes the scene elements and adds them to the scene.
+     *The application initialization method. This method is called immediately
+     *after the Application class is loaded and constructed.
      *
-     * @param stage
+     *<p>This method initializes the element of the scene.</p>
+     *
+     * @author Kristopher Rangel
+     *
      */
-    private void init(Stage stage) {
+    public void init() {
         initBoard();
         createCircles();
         initMenuBar();
         this.window = new VBox(menuBar, board);
-        this.scene = new Scene(window);
+        
+        // default to human player server
+        this.isServer = true;
+        this.isHuman = true;
+    }
+    
+    /**
+     * <ul><b><i>stop</i></b></ul>
+     * <ul><ul><p><code> stop () </code></p></ul>
+     *
+     *This method is called when the application should stop, and provides a
+     *convenient place to prepare for application exit and destroy resources. 
+     *
+     *
+     */
+    public void stop() {
+        //TODO clean up network 
     }
     
     /**
@@ -91,6 +121,7 @@ public class Connect4View extends Application implements Observer{
      *
      * Sets up the menu bar and associated menu options.
      *
+     * @author Kristopher Rangel
      */
     private void initMenuBar() {
         menuBar = new MenuBar();
@@ -104,12 +135,25 @@ public class Connect4View extends Application implements Observer{
     private void startNewGame() {
         Connect4NetworkSetup ns = new Connect4NetworkSetup();
         ns.showAndWait();
+        if(ns.userHitOK()) { // user hit okay to start new game
+            
+            // Getting user options
+            server = ns.getServer();
+            port = ns.getPort();
+            isHuman = ns.getPlayAsSelection();
+            isServer = ns.getCreateModeSelection();
+            
+            inputEnabled = true;
+            
+            //TODO start new game (with server/client and human/computer options
+        }
+        
         
         //System.out.printf("Okay button hit: %b\n", ns.userHitOK());
         //System.out.printf("Server selected: %b\n", ns.getCreateModeSelection());
         //System.out.printf("Human selected: %b\n", ns.getPlayAsSelection());
         
-      //TODO get info from Network Setup dialog and use it
+        //TODO get info from Network Setup dialog and use it
     }
     
     /**
@@ -121,6 +165,7 @@ public class Connect4View extends Application implements Observer{
      * <p>This function sets the board background, alignment, and padding. Then it
      * invokes the {@link #createCircles()} method.
      *
+     * @author Kristopher Rangel
      */
     private void initBoard() {
         board = new GridPane();
@@ -144,6 +189,8 @@ public class Connect4View extends Application implements Observer{
      * complete the on click action.
      *
      * @param xCoord - the x-coordinate of the mouse cursor location on click
+     * 
+     * @author Kristopher Rangel
      */
     private void onClick(double xCoord) {
         int position = (int) Math.ceil(xCoord); // Rounding up decimal to nearest integer
@@ -159,17 +206,30 @@ public class Connect4View extends Application implements Observer{
      * Checks selected column for valid move and performs move, if available.
      *
      * @param column - the column selected to perform a move on
+     * 
+     * @author Kristopher Rangel
      */
     private void selectColumn(int column) {
         boolean columnFull = false;
         
-        //TODO check for full column
-        
-        
+        //TODO update if statement when controller is implemented (and remove boolean)
+        //if(controller.isColumnFull(column)){
         if(columnFull) {
-            Alert alert = new Alert(AlertType.INFORMATION, "Column full, pick somewhere else!");
+            Alert alert = new Alert(AlertType.ERROR, "Column full, pick somewhere else!");
             alert.showAndWait().filter(response -> response == ButtonType.OK);
+        }else { // Processing turn TODO need to
+            
+            //TODO update after controller methods are implemented
+            
+            // inputEnabled = false;
+            // controller.humanTurn(column);           
+            
+            // Computer turn
+            // while(!controller.computerTurn());
+            // inputEnabled = true;     //look at possible Platform.runLater
+
         }
+        
     }
     
     /**
@@ -178,6 +238,7 @@ public class Connect4View extends Application implements Observer{
      *
      * Creates white circle objects and adds them to the board.
      *
+     * @author Kristopher Rangel
      */
     private void createCircles() {
         board.getChildren().clear();
@@ -196,27 +257,25 @@ public class Connect4View extends Application implements Observer{
      * Checks with the {@link Connect4Controller} for a game over condition
      * and displays an alert box in that event.
      *
+     * @author Kristopher Rangel
      */
     private void checkGameOver() {
         boolean isGameOver = false;
         boolean hasWon = false;
-        //TODO check with controller for win/loss condition
-        //TODO set win flag if won
+        //TODO update if statement
+        // if(controller.isGameOver()){
         if(isGameOver) {
             String msg = "You lost!";
-            if(hasWon)
-                msg = "You won!";
+            if(hasWon) { msg = "You won!"; }
+            
+            inputEnabled = false;
+            
             Alert alert = new Alert(AlertType.INFORMATION, msg);
             alert.showAndWait().filter(response -> response == ButtonType.OK);
-
         }
         
     }
-    
-    
-    
-    
-    
+      
     /**
      * <ul><b><i>update</i></b></ul>
      * <ul><ul><p><code> public void update (Observable o, Object arg) </code></p></ul>
@@ -225,9 +284,22 @@ public class Connect4View extends Application implements Observer{
      * object.
      *
      * @param o - the {@link Connect4Model} being observed
-     * @param arg
+     * @param arg - a {@link Connect4MoveMessage} with information related to the move
+     * 
+     * @author Kristopher Rangel 
      */
     public void update(Observable o, Object arg) {
-
+        Connect4MoveMessage message = (Connect4MoveMessage) arg;
+        int row = message.getRow();
+        int col = message.getColumn();
+        int color = message.getColor();
+        int index = (row*COLUMNS) + col;
+        Color paint = Color.WHITE;
+        
+        if(color == Connect4MoveMessage.YELLOW) { paint = Color.YELLOW; }
+        if(color == Connect4MoveMessage.RED)    { paint = Color.RED; }
+        
+        Circle c = (Circle) board.getChildren().get(index);
+        c.fillProperty().set(paint);
     }
 }

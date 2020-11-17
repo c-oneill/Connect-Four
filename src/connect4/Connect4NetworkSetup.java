@@ -40,6 +40,7 @@ public class Connect4NetworkSetup extends Stage{
      * 
      * Constructor.
      * 
+     * @author Kristopher Rangel
      */
     public Connect4NetworkSetup(){
         this.hitOK = false;
@@ -60,6 +61,8 @@ public class Connect4NetworkSetup extends Stage{
      * include a Label and two toggle options: Server and Client.</p>
      *
      * @return - the <code>HBox</code> containing the elements of the 'Create' row of options
+     * 
+     * @author Kristopher Rangel
      */
     private HBox getCreateToggleRow() {
         Label createLabel = new Label("Create: ");
@@ -85,6 +88,8 @@ public class Connect4NetworkSetup extends Stage{
      * include a Label and two toggle options: Human and Computer.</p>
      *
      * @return - the <code>HBox</code> containing the elements of the 'Play as' row of options
+     * 
+     * @author Kristopher Rangel
      */    private HBox getPlayAsToggleRow() {
         Label playAsLabel = new Label("Play as: ");
         ToggleGroup playAsTG = new ToggleGroup();
@@ -110,6 +115,7 @@ public class Connect4NetworkSetup extends Stage{
      * 
      * <p>The default server is {@value #DEFAULT_SERVER} and the default port is {@value #DEFAULT_PORT}.</p>
      *
+     * @author Kristopher Rangel
      */
     private void setScene() {
 
@@ -159,6 +165,8 @@ public class Connect4NetworkSetup extends Stage{
      * Getter for user Server/Client selection during network setup.
      *
      * @return <li><code>True</code> if 'Server' was selected,<li><code>False</code> if 'Client' was selected
+     * 
+     * @author Kristopher Rangel
      */
     public boolean getCreateModeSelection() {
         return serverRB.isSelected();
@@ -171,6 +179,8 @@ public class Connect4NetworkSetup extends Stage{
      * Getter for user Human/Computer selection during network setup.
      *
      * @return <li><code>True</code> if 'Human' was selected,<li><code>False</code> if 'Computer' was selected
+     * 
+     * @author Kristopher Rangel
      */
     public boolean getPlayAsSelection() {
         return humanRB.isSelected();
@@ -183,6 +193,8 @@ public class Connect4NetworkSetup extends Stage{
      * Gets the user-entered Server.
      *
      * @return - the <code>String</code> value the user entered into the server text box
+     * 
+     * @author Kristopher Rangel
      */
     public String getServer() {
         return serverTF.getText();
@@ -195,6 +207,8 @@ public class Connect4NetworkSetup extends Stage{
      * Gets the user-entered port number.
      *
      * @return - the <code>Integer</code> representation of the user entered value in the port text box
+     *
+     * @author Kristopher Rangel
      */
     public int getPort() {
         return Integer.valueOf(portTF.getText());
@@ -206,8 +220,10 @@ public class Connect4NetworkSetup extends Stage{
      *
      * Gets whether the user hit the okay button or the cancel button (or clicked the X to exit)
      *
-      * @return <li><code>True</code> if the Okay button was clicked,
-      * <li><code>False</code> if Cancel button was clicked, or the window was exited with the 'X' box
+     * @return <li><code>True</code> if the Okay button was clicked,
+     * <li><code>False</code> if Cancel button was clicked, or the window was exited with the 'X' box
+     * 
+     * @author Kristopher Rangel 
      */
     public boolean userHitOK() {
         return hitOK;
