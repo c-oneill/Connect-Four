@@ -94,22 +94,22 @@ public class Connect4Model extends Observable
 	 */
 	public void setPosition(int row, int col, int color)
 	{
-			grid[row][col] = color;
+		grid[row][col] = color;
 			
-			// check for winner
-			if (checkForStreak(row, col, color))
-				winner = color;
-			
-			// update disc positon lists
-			if (color == Connect4MoveMessage.RED)
-				redList.add(new int[] {row, col});
-			if (color == Connect4MoveMessage.YELLOW)
-				yellowList.add(new int[] {row, col});
-			
-			// notify observers of changes
-			Connect4MoveMessage message = new Connect4MoveMessage(row, col, color);
-			setChanged();
-			notifyObservers(message);
+		// update disc positon lists
+		if (color == Connect4MoveMessage.RED)
+			redList.add(new int[] {row, col});
+		if (color == Connect4MoveMessage.YELLOW)
+			yellowList.add(new int[] {row, col});
+		
+		// check for winner
+		if (checkForStreak(color))
+			winner = color;
+
+		// notify observers of changes
+		Connect4MoveMessage message = new Connect4MoveMessage(row, col, color);
+		setChanged();
+		notifyObservers(message);
 	}
 	
 	/**
@@ -120,7 +120,7 @@ public class Connect4Model extends Observable
 	 * @param color which disc set is checked
 	 * @return
 	 */
-	private boolean checkForStreak(int row, int col, int color)
+	private boolean checkForStreak(int color)
 	{
 		ArrayList<int[]> list;
 		
@@ -130,11 +130,11 @@ public class Connect4Model extends Observable
 			list = yellowList;
 		else
 			return false;
-		
+				
 		for (int[] pair : list)
 		{
-			row = pair[0];
-			col = pair[1];
+			int row = pair[0];
+			int col = pair[1];
 			// check down
 			if (row + 3 < ROWS 
 					&& grid[row + 1][col] == color
