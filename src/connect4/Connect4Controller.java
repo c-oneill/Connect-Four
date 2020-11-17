@@ -103,4 +103,18 @@ public class Connect4Controller
     	return true;
     }
     
+    /**
+     * <ul><b><i>setModelObserver</i></b></ul>
+     * <ul><ul><p><code> void setModelObserver () </code></p></ul>
+     *
+     * Adds a {@link Connect4View} as an observer of the {@link Connect4Model}.
+     *
+     * @param view - the <code>Connect4View</code> to observer the <code>Connect4Model</code>
+     * 
+     * @author Kristopher Rangel
+     */
+    public void setModelObserver(Connect4View view) {
+        model.addObserver(view);
+    }
+    
 }

@@ -59,8 +59,9 @@ public class Connect4View extends Application implements Observer{
     @Override
     public void start(Stage stage) {
 
-        this.controller = new Connect4Controller();
-        this.scene = new Scene(window);
+        controller = new Connect4Controller();
+        controller.setModelObserver(this);
+        scene = new Scene(window);
         
         // Showing stage
         try {
@@ -100,6 +101,7 @@ public class Connect4View extends Application implements Observer{
         // default to human player server
         this.isServer = true;
         this.isHuman = true;
+        
     }
     
     /**
@@ -210,24 +212,23 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     private void selectColumn(int column) {
-        boolean columnFull = false;
         
-        //TODO update if statement when controller is implemented (and remove boolean)
-        //if(controller.isColumnFull(column)){
-        if(columnFull) {
+        if(controller.isColumnFull(column)){        
             Alert alert = new Alert(AlertType.ERROR, "Column full, pick somewhere else!");
             alert.showAndWait().filter(response -> response == ButtonType.OK);
         }else { // Processing turn TODO need to
             
             //TODO update after controller methods are implemented
             
-            // inputEnabled = false;
-            // controller.humanTurn(column);           
-            
-            // Computer turn
-            // while(!controller.computerTurn());
-            // inputEnabled = true;     //look at possible Platform.runLater
+            /* Non-network game */
+            inputEnabled = false;
+            controller.humanTurn(column);           
 
+            // Computer turn
+            if(!controller.isGameOver()) {
+                while(!controller.computerTurn());
+                inputEnabled = true;     //look at possible Platform.runLater when using threads
+            }
         }
         
     }
@@ -260,20 +261,18 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     private void checkGameOver() {
-        boolean isGameOver = false;
-        boolean hasWon = false;
-        //TODO update if statement
-        // if(controller.isGameOver()){
-        if(isGameOver) {
+        System.out.println("Checking for game over");
+        if(controller.isGameOver()){
+            System.out.println("Is game over");
             String msg = "You lost!";
-            if(hasWon) { msg = "You won!"; }
+            
+            if(controller.getWinner() == Connect4MoveMessage.YELLOW) { msg = "You won!"; }
             
             inputEnabled = false;
             
             Alert alert = new Alert(AlertType.INFORMATION, msg);
             alert.showAndWait().filter(response -> response == ButtonType.OK);
-        }
-        
+        }     
     }
       
     /**
@@ -301,5 +300,7 @@ public class Connect4View extends Application implements Observer{
         
         Circle c = (Circle) board.getChildren().get(index);
         c.fillProperty().set(paint);
+        System.out.printf("Updating color of row: %d, col: %d\n", row, col);
+        checkGameOver();
     }
 }
