@@ -129,12 +129,12 @@ public class Connect4View extends Application implements Observer{
         menuBar = new MenuBar();
         Menu fileMenu = new Menu("File");
         MenuItem newGame = new MenuItem("New Game");
-        newGame.setOnAction(e -> { startNewGame(); });
+        newGame.setOnAction(e -> { getNewGameOptions(); });
         fileMenu.getItems().add(newGame);
         menuBar.getMenus().add(fileMenu);
     }
     
-    private void startNewGame() {
+    private void getNewGameOptions() {
         Connect4NetworkSetup ns = new Connect4NetworkSetup();
         ns.showAndWait();
         if(ns.userHitOK()) { // user hit okay to start new game
@@ -148,14 +148,18 @@ public class Connect4View extends Application implements Observer{
             inputEnabled = true;
             
             //TODO start new game (with server/client and human/computer options
+            startNewGame();
         }
-        
-        
-        //System.out.printf("Okay button hit: %b\n", ns.userHitOK());
-        //System.out.printf("Server selected: %b\n", ns.getCreateModeSelection());
-        //System.out.printf("Human selected: %b\n", ns.getPlayAsSelection());
-        
-        //TODO get info from Network Setup dialog and use it
+ 
+    }
+    
+    private void startNewGame() {
+        if(isServer && isHuman) { // non network local game
+            controller = new Connect4Controller();
+            controller.setModelObserver(this);
+            createCircles();
+            inputEnabled = true;
+        }
     }
     
     /**
@@ -264,9 +268,11 @@ public class Connect4View extends Application implements Observer{
         System.out.println("Checking for game over");
         if(controller.isGameOver()){
             System.out.println("Is game over");
-            String msg = "You lost!";
+            String msg = "empty message";
             
             if(controller.getWinner() == Connect4MoveMessage.YELLOW) { msg = "You won!"; }
+            else if(controller.getWinner() == Connect4MoveMessage.RED) { msg = "You lost!"; }
+            else { msg = "It's a tie!"; }
             
             inputEnabled = false;
             
