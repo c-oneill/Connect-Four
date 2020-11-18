@@ -1,6 +1,7 @@
 package connect4;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Observable;
 
 /**
@@ -55,12 +56,12 @@ public class Connect4Model extends Observable
 	}
 	
 	/**
-	 * Get the underlying grid.
+	 * Get a copy of the underlying grid.
 	 * @return grid
 	 */
-	public int[][] getGrid()
+	public int[][] getGridCopy()
 	{
-		return grid;
+		return Arrays.copyOf(grid, grid.length);
 	}
 	
 	/**
@@ -159,7 +160,7 @@ public class Connect4Model extends Observable
 					&& grid[row - 2][col + 2] == color
 					&& grid[row - 3][col + 3] == color)
 			{
-				return true;
+				return true; 
 			}
 		
 			// check right/down
