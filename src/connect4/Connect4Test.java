@@ -40,6 +40,7 @@ public class Connect4Test
 	@Test
 	public void test_constructor()
 	{
+		System.out.println("Test: constructor");
 		//System.out.println(Arrays.deepToString(expectedGrid));
 		//System.out.println(Arrays.deepToString(controller.getGridCopy()));
 		assertArrayEquals(expectedGrid, controller.getGridCopy());
@@ -54,9 +55,13 @@ public class Connect4Test
 	@Test
 	public void test_FillingColumns()
 	{
+		System.out.println("Test: FillingColumns");
+		//invalid play
+		assertFalse(controller.humanTurn(Connect4Model.EMPTY, 0));
+		
 		for (int r = Connect4Model.ROWS - 1; r >= 1; r--)
 		{
-			for (int c = Connect4Model.COLUMNS - 1; c >= 1; c--)
+			for (int c = Connect4Model.COLUMNS - 1; c >= 0; c--)
 			{
 				expectedGrid[r][c] = Connect4MoveMessage.YELLOW; 
 				controller.humanTurn(c);
@@ -67,7 +72,7 @@ public class Connect4Test
 			}
 		}
 		// top row added
-		for (int c = Connect4Model.COLUMNS - 1; c >= 1; c--)
+		for (int c = Connect4Model.COLUMNS - 1; c >= 0; c--)
 		{
 			expectedGrid[0][c] = Connect4MoveMessage.YELLOW;
 			assertTrue(controller.humanTurn(c));
@@ -78,7 +83,7 @@ public class Connect4Test
 		}
 		
 		// playing in a column already full
-		for (int c = Connect4Model.COLUMNS - 1; c >= 1; c--)
+		for (int c = Connect4Model.COLUMNS - 1; c >= 0; c--)
 		{
 			// column full now?
 			// turn made?
@@ -93,6 +98,7 @@ public class Connect4Test
 	@Test
 	public void test_draw()
 	{
+		System.out.println("Test: draw");
 		//empty board - draw, game not over
 		assertEquals(controller.getWinner(), Connect4Model.EMPTY);
 		assertFalse(controller.isGameOver());
@@ -123,8 +129,95 @@ public class Connect4Test
 					else
 						controller.humanTurn(Connect4MoveMessage.YELLOW, c);
 				}
+				//printGrid(controller.getGridCopy());
 			}
 		}
+		assertEquals(controller.getWinner(), Connect4Model.EMPTY);
+		assertTrue(controller.isGameOver());
+	}
+	
+	/**
+	 * Allows recreation of an exact board.
+	 */
+	@Test
+	public void test_recreateBug()
+	{
+		System.out.println("Test: recreateBug");
+		//row0
+		int i = 0;
+		for (int color : new int[] {1,1,2,1,2,1,1})
+		{
+			controller.humanTurn(color, i);
+			i++;
+		}
+		
+		//row1
+		i = 0;
+		for (int color : new int[] {2,2,2,1,1,2,2})
+		{
+			controller.humanTurn(color, i);
+			i++;
+		}
+		
+		//row2
+		i = 0;
+		for (int color : new int[] {1,1,1,2,1,1,1})
+		{
+			controller.humanTurn(color, i);
+			i++;
+		}
+		
+		//row3
+		i = 0;
+		for (int color : new int[] {1,2,2,1,1,2,2})
+		{
+			controller.humanTurn(color, i);
+			i++;
+		}
+		
+		//row4
+		i = 0;
+		for (int color : new int[] {1,1,2,2,2,1,2})
+		{
+			controller.humanTurn(color, i);
+			i++;
+		}
+		
+		controller.humanTurn(2, 0);
+		controller.humanTurn(2, 1);
+		controller.humanTurn(1, 2);
+		controller.humanTurn(1, 3);
+		controller.humanTurn(2, 4);
+		controller.humanTurn(2, 6);
+		
+//		System.out.println("winner: " + controller.getWinner());
+//		System.out.println("isGameOver: " + controller.isGameOver());
+//		System.out.println("is column five full: " + controller.isColumnFull(5));
+//		printGrid(controller.getGridCopy());
+//		assertEquals(controller.getWinner(), Connect4Model.EMPTY);
+//		assertFalse(controller.isGameOver());
+//		assertFalse(controller.isColumnFull(5));
+//		
+//		controller.humanTurn(2, 5);
+//		System.out.println("winner: " + controller.getWinner());
+//		System.out.println("isGameOver: " + controller.isGameOver());
+//		System.out.println("is column five full: " + controller.isColumnFull(5));
+//		printGrid(controller.getGridCopy());
+//		assertEquals(controller.getWinner(), Connect4Model.EMPTY);
+//		assertTrue(controller.isGameOver());
+//		assertTrue(controller.isColumnFull(5));
+		
+		//row5
+		i = 0;
+		for (int color : new int[] {2,2,1,1,2,2,2})
+		{
+			controller.humanTurn(color, i);
+			//System.out.println(controller.getWinner());
+			//System.out.println(controller.isColumnFull(i));
+			i++;
+		}
+		//printGrid(controller.getGridCopy());
+		
 		assertEquals(controller.getWinner(), Connect4Model.EMPTY);
 		assertTrue(controller.isGameOver());
 	}
@@ -135,6 +228,7 @@ public class Connect4Test
 	@Test
 	public void test_fourInRow_Vertical()
 	{
+		System.out.println("Test: fourInRow_Vertical");
 		for (int i = 0; i < 4; i++)
 		{
 			assertNotEquals(controller.getWinner(), Connect4MoveMessage.YELLOW);
@@ -151,6 +245,7 @@ public class Connect4Test
 	@Test
 	public void test_fourInRow_Horizontal()
 	{
+		System.out.println("Test: fourInRow_Horizontal");
 		for (int i = 0; i < 4; i++)
 		{
 			assertNotEquals(controller.getWinner(), Connect4MoveMessage.RED);
@@ -167,6 +262,7 @@ public class Connect4Test
 	@Test
 	public void test_fourInRow_LeftUp()
 	{
+		System.out.println("Test: fourInRow_LeftUp");
 		for (int i = 4; i > 0; i--)
 		{
 			assertNotEquals(controller.getWinner(), Connect4MoveMessage.RED);
@@ -188,6 +284,7 @@ public class Connect4Test
 	@Test
 	public void test_fourInRow_RightUp()
 	{
+		System.out.println("Test: fourInRow_RightUp");
 		for (int i = 0; i < 4; i++)
 		{
 			assertNotEquals(controller.getWinner(), Connect4MoveMessage.RED);
@@ -209,6 +306,7 @@ public class Connect4Test
 	@Test
 	public void test_ComputerTurn()
 	{
+		System.out.println("Test: ComputerTurn");
 		while (!controller.isGameOver())
 		{
 			controller.computerTurn(Connect4MoveMessage.RED);
@@ -222,6 +320,7 @@ public class Connect4Test
 	@Test
 	public void test_setModelObserver()
 	{
+		System.out.println("Test: setModelObserver");
 		Connect4View view = new TestView();
 		controller.setModelObserver(view);
 		
@@ -244,6 +343,19 @@ public class Connect4Test
 		{
 			observed = true;
 		}
+	}
+	
+	/**
+	 * Prints the underlying grid for debugging purposes.
+	 * @param grid 2D array to print
+	 */
+	private void printGrid(int[][] grid)
+	{
+		for (int[] row : grid) 
+		{
+			System.out.println(Arrays.toString(row));
+		}
+		System.out.println();
 	}
 	
 	/**
