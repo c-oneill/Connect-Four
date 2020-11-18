@@ -6,6 +6,12 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * This class encapsulates the network functions of the Connect4 program.
+ * 
+ * @author Kristopher Rangel
+ *
+ */
 public class Connect4Network {
     private Socket connection;
     private ObjectOutputStream output;
@@ -14,6 +20,20 @@ public class Connect4Network {
     private boolean hasStartError;
     private String errorMessage;
     
+    /**
+     * Constructor.
+     * <p>This constructor starts a server connections or client connection as
+     * appropriate on the given port.
+     * 
+     * @param isServer - whether a server connection should be established
+     *                   <li>if True, a server connection will be established
+     *                   <li>if False, a client connection will be established
+     * @param server - the hostname
+     * @param port - the port number
+     * 
+     * @author Kristopher Rangel
+     * 
+     */
     public Connect4Network(boolean isServer, String server, int port) {
         
         if(isServer) {
@@ -34,6 +54,8 @@ public class Connect4Network {
      * the error message can be retrieved by invoking {@link #getErrorMessage()}.
      *
      * @return true if no exception, false otherwise
+     * 
+     * @author Kristopher Rangel
      */
     private boolean startServer(int port) {
         boolean hasNoException = true;
@@ -66,6 +88,8 @@ public class Connect4Network {
      * @param port - the port number
      * @return true if no exception, false otherwise
      * 
+     * @author Kristopher Rangel
+     * 
      */
 
     private boolean startClient(String server, int port) {
@@ -94,6 +118,8 @@ public class Connect4Network {
      * the error message can be retrieved by invoking {@link #getErrorMessage()}.
      *
      * @return true if no exception, false otherwise
+     * 
+     * @author Kristopher Rangel
      */
     public boolean closeConnection() {
         boolean hasNoException = true;
