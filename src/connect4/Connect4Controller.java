@@ -127,13 +127,16 @@ public class Connect4Controller
      */
     private boolean playInColumn(int col, int color)
     {
-    	int row = nextOpen[col];
+    	if (color == Connect4Model.EMPTY)
+    		return false;
     	
+    	int row = nextOpen[col];
+    	 
     	if (isColumnFull(col))
     		return false;
     	
-    	model.setPosition(row, col, color);
     	nextOpen[col]--;
+    	model.setPosition(row, col, color);
     	return true;
     }
     
