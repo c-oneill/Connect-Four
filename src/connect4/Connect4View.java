@@ -14,9 +14,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 
-import java.net.*;
-import java.io.*;
-
 /**
  * This class serves as the UI for the Connect4 program.
  * 
@@ -43,16 +40,16 @@ public class Connect4View extends Application implements Observer{
     private GridPane board;
     private MenuBar menuBar;
     private Connect4Controller controller;
-    
+    private Connect4MoveMessage message;
+
     private boolean inputEnabled;
     private String server;
     private int port;
     private boolean isServer;
     private boolean isHuman;
+    private int color;
     
-    Socket connection;
-    ObjectOutputStream output;
-    ObjectInputStream input;
+    
     /**
      * <ul><b><i>start</i></b></ul>
      * <ul><ul><p><code>public void start (Stage stage) </code></p></ul>
@@ -114,7 +111,7 @@ public class Connect4View extends Application implements Observer{
     
     /**
      * <ul><b><i>stop</i></b></ul>
-     * <ul><ul><p><code> stop () </code></p></ul>
+     * <ul><ul><p><code>public void stop ()</code></p></ul>
      *
      *This method is called when the application should stop, and provides a
      *convenient place to prepare for application exit and destroy resources. 
@@ -122,8 +119,8 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     public void stop() {
-        //TODO clean up network 
-        closeConnection();
+        //Network cleanup 
+        //TODO closeConnection();
     }
     
     /**
@@ -163,15 +160,6 @@ public class Connect4View extends Application implements Observer{
             isHuman = ns.getPlayAsSelection();
             isServer = ns.getCreateModeSelection();
             
-            inputEnabled = true;
-            
-            if(isServer) {
-               startServer();
-            }else {
-                startClient();
-            }
-            
-            //TODO start new game (with server/client and human/computer options
             startNewGame();
         }
  
@@ -186,14 +174,39 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     private void startNewGame() {
-        if(isServer && isHuman) { // non network local game
-            controller = new Connect4Controller();
-            controller.setModelObserver(this);
-            createCircles();
-            inputEnabled = true;
+        controller = new Connect4Controller();
+        controller.setModelObserver(this);
+        createCircles();
+        if(isServer) {
+            color = Connect4MoveMessage.YELLOW;
+            stage.setTitle("Connect4 (Server)");
+        }else {
+            color = Connect4MoveMessage.RED;
+            stage.setTitle("Connect4 (Client)");
+            inputEnabled = false;
+        }
+        
+        //TODO create server/client connection
+        //TODO check for start error and display alert, if necessary
+        
+        
+        play();
+    }
+    
+    private void play() {
+        if(isServer) {
+            if(isHuman) {inputEnabled = true;   }
+            else { // computer
+                inputEnabled = false;
+                while(!controller.computerTurn(color));
+            }
+            
+        }else { // is a client
+
         }
     }
     
+
     /**
      * <ul><b><i>initBoard</i></b></ul>
      * <ul><ul><p><code> private void initBoard () </code></p></ul>
@@ -258,7 +271,8 @@ public class Connect4View extends Application implements Observer{
             /* Non-network game */
             inputEnabled = false;
             controller.humanTurn(column);           
-
+            
+            
             // Computer turn
             if(!controller.isGameOver()) {
                 while(!controller.computerTurn());
@@ -329,7 +343,8 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel 
      */
     public void update(Observable o, Object arg) {
-        Connect4MoveMessage message = (Connect4MoveMessage) arg;
+        message = (Connect4MoveMessage) arg;
+
         int row = message.getRow();
         int col = message.getColumn();
         int color = message.getColor();
@@ -343,40 +358,5 @@ public class Connect4View extends Application implements Observer{
         c.fillProperty().set(paint);
         System.out.printf("Updating color of row: %d, col: %d\n", row, col);
         checkGameOver();
-    }
-    
-    private void startServer() {
-        try {
-            ServerSocket serverSocket = new ServerSocket(port);
-            connection = serverSocket.accept();
-            output = new ObjectOutputStream(connection.getOutputStream());
-            input = new ObjectInputStream(connection.getInputStream());
-            stage.setTitle("Connect4 (Server)");
-        }catch(IOException e) {
-            showAlert(AlertType.ERROR, "IOException occurred while trying to establish server.");
-            e.printStackTrace();
-        }
-    }
-    
-    private void closeConnection() {
-        try {
-            if(connection != null)
-                connection.close();
-        }catch(IOException e) {
-            showAlert(AlertType.ERROR, "IOException occurred while trying to close connection.");
-            e.printStackTrace();
-        }
-    }
-    
-    private void startClient() {
-        try {
-            connection = new Socket(server, port);
-            output = new ObjectOutputStream(connection.getOutputStream());
-            input = new ObjectInputStream(connection.getInputStream());
-            stage.setTitle("Connect4 (Client)");
-        }catch(IOException e) {
-            showAlert(AlertType.ERROR, "IOException occurred while trying to establish connection to server.");
-            e.printStackTrace();
-        }
     }
 }
