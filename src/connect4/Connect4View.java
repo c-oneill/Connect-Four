@@ -1,5 +1,6 @@
 package connect4;
 
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -33,17 +34,21 @@ public class Connect4View extends Application implements Observer{
     private final int COLUMNS = 7;
     private final int ROWS = 6;
 
+    private Stage stage;
     private Scene scene;
     private VBox window;
     private GridPane board;
     private MenuBar menuBar;
     private Connect4Controller controller;
-    
+    private Connect4MoveMessage message;
+
     private boolean inputEnabled;
     private String server;
     private int port;
     private boolean isServer;
     private boolean isHuman;
+    private int color;
+    
     
     /**
      * <ul><b><i>start</i></b></ul>
@@ -66,13 +71,13 @@ public class Connect4View extends Application implements Observer{
         // Showing stage
         try {
             inputEnabled = true;
- 
+            
             // setting the stage
             stage.setTitle("Connect4");
             stage.setResizable(false);
             stage.setScene(scene);
             stage.show();
-
+            this.stage = stage;
 
         }catch(Exception e) {
             e.printStackTrace();
@@ -106,7 +111,7 @@ public class Connect4View extends Application implements Observer{
     
     /**
      * <ul><b><i>stop</i></b></ul>
-     * <ul><ul><p><code> stop () </code></p></ul>
+     * <ul><ul><p><code>public void stop ()</code></p></ul>
      *
      *This method is called when the application should stop, and provides a
      *convenient place to prepare for application exit and destroy resources. 
@@ -114,7 +119,8 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     public void stop() {
-        //TODO clean up network 
+        //Network cleanup 
+        //TODO closeConnection();
     }
     
     /**
@@ -154,9 +160,6 @@ public class Connect4View extends Application implements Observer{
             isHuman = ns.getPlayAsSelection();
             isServer = ns.getCreateModeSelection();
             
-            inputEnabled = true;
-            
-            //TODO start new game (with server/client and human/computer options
             startNewGame();
         }
  
@@ -171,14 +174,39 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     private void startNewGame() {
-        if(isServer && isHuman) { // non network local game
-            controller = new Connect4Controller();
-            controller.setModelObserver(this);
-            createCircles();
-            inputEnabled = true;
+        controller = new Connect4Controller();
+        controller.setModelObserver(this);
+        createCircles();
+        if(isServer) {
+            color = Connect4MoveMessage.YELLOW;
+            stage.setTitle("Connect4 (Server)");
+        }else {
+            color = Connect4MoveMessage.RED;
+            stage.setTitle("Connect4 (Client)");
+            inputEnabled = false;
+        }
+        
+        //TODO create server/client connection
+        //TODO check for start error and display alert, if necessary
+        
+        
+        play();
+    }
+    
+    private void play() {
+        if(isServer) {
+            if(isHuman) {inputEnabled = true;   }
+            else { // computer
+                inputEnabled = false;
+                while(!controller.computerTurn(color));
+            }
+            
+        }else { // is a client
+
         }
     }
     
+
     /**
      * <ul><b><i>initBoard</i></b></ul>
      * <ul><ul><p><code> private void initBoard () </code></p></ul>
@@ -234,9 +262,8 @@ public class Connect4View extends Application implements Observer{
      */
     private void selectColumn(int column) {
         
-        if(controller.isColumnFull(column)){        
-            Alert alert = new Alert(AlertType.ERROR, "Column full, pick somewhere else!");
-            alert.showAndWait().filter(response -> response == ButtonType.OK);
+        if(controller.isColumnFull(column)){  
+            showAlert(AlertType.ERROR, "Column full, pick somewhere else!");
         }else { // Processing turn TODO need to
             
             //TODO update after controller methods are implemented
@@ -244,7 +271,8 @@ public class Connect4View extends Application implements Observer{
             /* Non-network game */
             inputEnabled = false;
             controller.humanTurn(column);           
-
+            
+            
             // Computer turn
             if(!controller.isGameOver()) {
                 while(!controller.computerTurn());
@@ -293,11 +321,15 @@ public class Connect4View extends Application implements Observer{
             
             inputEnabled = false;
             
-            Alert alert = new Alert(AlertType.INFORMATION, msg);
-            alert.showAndWait().filter(response -> response == ButtonType.OK);
+            showAlert(AlertType.INFORMATION, msg);
         }     
     }
-      
+    
+    private void showAlert(AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.showAndWait().filter(response -> response == ButtonType.OK);
+    }
+    
     /**
      * <ul><b><i>update</i></b></ul>
      * <ul><ul><p><code> public void update (Observable o, Object arg) </code></p></ul>
@@ -311,7 +343,8 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel 
      */
     public void update(Observable o, Object arg) {
-        Connect4MoveMessage message = (Connect4MoveMessage) arg;
+        message = (Connect4MoveMessage) arg;
+
         int row = message.getRow();
         int col = message.getColumn();
         int color = message.getColor();
