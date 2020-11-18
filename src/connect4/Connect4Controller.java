@@ -1,5 +1,7 @@
 package connect4;
 
+import java.util.Arrays;
+
 /**
  * This class serves as the Controller in the Connect 4 Program, allowing the 
  * {@link Connect4View} to indirectly interact with the 
@@ -35,13 +37,13 @@ public class Connect4Controller
      * @return true if the game is over, false otherwise.
      */
     public boolean isGameOver()
-    {
+    { 
     	for (int i = 0; i < nextOpen.length; i++)
     	{
     		if (!isColumnFull(i))
     			return model.getWinner() != Connect4Model.EMPTY;
     	}
-        return false;
+        return true;
     }
     
     /**
@@ -52,6 +54,15 @@ public class Connect4Controller
     {
         return model.getWinner();
     }
+    
+	/**
+	 * Get a copy of the underlying model's grid.
+	 * @return grid
+	 */
+	public int[][] getGridCopy()
+	{
+		return model.getGridCopy();
+	}
     
     /**
      * Checks if the indicated column is empty.
@@ -74,14 +85,37 @@ public class Connect4Controller
     }
     
     /**
-     * Makes a play in the indicated column in the human player color, yellow.
+     * Overloads {@link Connect4Controller#humanTurn(int)} to allow color 
+     * selection.
      * @param col column index
+     * @param color color to play
+     * @return true if the play is made, false otherwise
+     */
+    public boolean humanTurn(int color, int col)
+    {
+        return playInColumn(col, color);
+    }
+    
+    /**
+     * Makes a play in the indicated column in the computer player color, red.
      * @return true if the play is made, false otherwise
      */
     public boolean computerTurn()
     {
     	int randCol = ((int) (Math.random() * 100)) % Connect4Model.COLUMNS;
     	return playInColumn(randCol, Connect4MoveMessage.RED);
+    }
+    
+    /**
+     * Overloads {@link Connect4Controller#computerTurn(int)} to allow color 
+     * selection.
+     * @param color color to play
+     * @return true if the play is made, false otherwise
+     */
+    public boolean computerTurn(int color)
+    {
+    	int randCol = ((int) (Math.random() * 100)) % Connect4Model.COLUMNS;
+    	return playInColumn(randCol, color);
     }
     
     /**
