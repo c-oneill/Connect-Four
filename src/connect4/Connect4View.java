@@ -1,5 +1,6 @@
 package connect4;
 
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -12,6 +13,9 @@ import javafx.geometry.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
+
+import java.net.*;
+import java.io.*;
 
 /**
  * This class serves as the UI for the Connect4 program.
@@ -33,6 +37,7 @@ public class Connect4View extends Application implements Observer{
     private final int COLUMNS = 7;
     private final int ROWS = 6;
 
+    private Stage stage;
     private Scene scene;
     private VBox window;
     private GridPane board;
@@ -45,6 +50,9 @@ public class Connect4View extends Application implements Observer{
     private boolean isServer;
     private boolean isHuman;
     
+    Socket connection;
+    ObjectOutputStream output;
+    ObjectInputStream input;
     /**
      * <ul><b><i>start</i></b></ul>
      * <ul><ul><p><code>public void start (Stage stage) </code></p></ul>
@@ -66,13 +74,13 @@ public class Connect4View extends Application implements Observer{
         // Showing stage
         try {
             inputEnabled = true;
- 
+            
             // setting the stage
             stage.setTitle("Connect4");
             stage.setResizable(false);
             stage.setScene(scene);
             stage.show();
-
+            this.stage = stage;
 
         }catch(Exception e) {
             e.printStackTrace();
@@ -115,6 +123,7 @@ public class Connect4View extends Application implements Observer{
      */
     public void stop() {
         //TODO clean up network 
+        closeConnection();
     }
     
     /**
@@ -155,6 +164,12 @@ public class Connect4View extends Application implements Observer{
             isServer = ns.getCreateModeSelection();
             
             inputEnabled = true;
+            
+            if(isServer) {
+               startServer();
+            }else {
+                startClient();
+            }
             
             //TODO start new game (with server/client and human/computer options
             startNewGame();
@@ -234,9 +249,8 @@ public class Connect4View extends Application implements Observer{
      */
     private void selectColumn(int column) {
         
-        if(controller.isColumnFull(column)){        
-            Alert alert = new Alert(AlertType.ERROR, "Column full, pick somewhere else!");
-            alert.showAndWait().filter(response -> response == ButtonType.OK);
+        if(controller.isColumnFull(column)){  
+            showAlert(AlertType.ERROR, "Column full, pick somewhere else!");
         }else { // Processing turn TODO need to
             
             //TODO update after controller methods are implemented
@@ -293,11 +307,15 @@ public class Connect4View extends Application implements Observer{
             
             inputEnabled = false;
             
-            Alert alert = new Alert(AlertType.INFORMATION, msg);
-            alert.showAndWait().filter(response -> response == ButtonType.OK);
+            showAlert(AlertType.INFORMATION, msg);
         }     
     }
-      
+    
+    private void showAlert(AlertType type, String message) {
+        Alert alert = new Alert(type, message);
+        alert.showAndWait().filter(response -> response == ButtonType.OK);
+    }
+    
     /**
      * <ul><b><i>update</i></b></ul>
      * <ul><ul><p><code> public void update (Observable o, Object arg) </code></p></ul>
@@ -325,5 +343,40 @@ public class Connect4View extends Application implements Observer{
         c.fillProperty().set(paint);
         System.out.printf("Updating color of row: %d, col: %d\n", row, col);
         checkGameOver();
+    }
+    
+    private void startServer() {
+        try {
+            ServerSocket serverSocket = new ServerSocket(port);
+            connection = serverSocket.accept();
+            output = new ObjectOutputStream(connection.getOutputStream());
+            input = new ObjectInputStream(connection.getInputStream());
+            stage.setTitle("Connect4 (Server)");
+        }catch(IOException e) {
+            showAlert(AlertType.ERROR, "IOException occurred while trying to establish server.");
+            e.printStackTrace();
+        }
+    }
+    
+    private void closeConnection() {
+        try {
+            if(connection != null)
+                connection.close();
+        }catch(IOException e) {
+            showAlert(AlertType.ERROR, "IOException occurred while trying to close connection.");
+            e.printStackTrace();
+        }
+    }
+    
+    private void startClient() {
+        try {
+            connection = new Socket(server, port);
+            output = new ObjectOutputStream(connection.getOutputStream());
+            input = new ObjectInputStream(connection.getInputStream());
+            stage.setTitle("Connect4 (Client)");
+        }catch(IOException e) {
+            showAlert(AlertType.ERROR, "IOException occurred while trying to establish connection to server.");
+            e.printStackTrace();
+        }
     }
 }
