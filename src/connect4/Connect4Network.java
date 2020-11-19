@@ -17,7 +17,7 @@ public class Connect4Network {
     private ObjectOutputStream output;
     private ObjectInputStream input;
     
-    private boolean hasStartError;
+    private boolean startedWithoutError;
     private String errorMessage;
     
     /**
@@ -37,9 +37,9 @@ public class Connect4Network {
     public Connect4Network(boolean isServer, String server, int port) {
         
         if(isServer) {
-            hasStartError = startServer(port);
+            startedWithoutError = startServer(port);
         }else {
-            hasStartError = startClient(server, port);
+            startedWithoutError = startClient(server, port);
         }
     }
     
@@ -198,6 +198,6 @@ public class Connect4Network {
         return message;
     }
     
-    public boolean getStartError() { return hasStartError; }
+    public boolean getStartError() { return !startedWithoutError; }
     public String getErrorMessage() { return errorMessage; }
 }

@@ -176,17 +176,24 @@ public class Connect4View extends Application implements Observer{
         controller = new Connect4Controller();
         controller.setModelObserver(this);
         createCircles();
-        if(isServer) {
-            color = Connect4MoveMessage.YELLOW;
-            stage.setTitle("Connect4 (Server)");
-        }else {
-            color = Connect4MoveMessage.RED;
-            stage.setTitle("Connect4 (Client)");
-            inputEnabled = false;
-        }
         
-        //TODO create server/client connection
-        //TODO check for start error and display alert, if necessary
+        /* Network setup (maybe move Network management to controller?) */
+          Connect4Network network = new Connect4Network(isServer, server, port);
+          boolean hasConnectionError = network.getStartError(); 
+          if(hasConnectionError) {
+              showAlert(AlertType.ERROR, network.getErrorMessage());
+          }else {
+              if(isServer) {
+                  color = Connect4MoveMessage.YELLOW;
+                  stage.setTitle("Connect4 (Server)");
+              }else {
+                  color = Connect4MoveMessage.RED;
+                  stage.setTitle("Connect4 (Client)");
+                  inputEnabled = false;
+              }
+          }
+         
+        /* ************************************************************* */
         
         
         play();
@@ -194,14 +201,20 @@ public class Connect4View extends Application implements Observer{
     
     private void play() {
         if(isServer) {
-            if(isHuman) {inputEnabled = true;   }
-            else { // computer
+            if(isHuman && inputEnabled) { // player turn
+                // waiting for mouse input  
+            } else if(!isHuman && inputEnabled) { // computer turn
                 inputEnabled = false;
                 while(!controller.computerTurn(color));
             }
             
         }else { // is a client
-
+            if(isHuman && inputEnabled) { // player turn
+                // waiting for mouse input
+            } else if(!isHuman && inputEnabled){ // computer turn
+                inputEnabled = false;
+                while(!controller.computerTurn(color));
+            }
         }
     }
     
@@ -246,7 +259,7 @@ public class Connect4View extends Application implements Observer{
         int position = (int) Math.ceil(xCoord); // Rounding up decimal to nearest integer
         int column = (position - 5) / (HGAP_PADDING + 2 * CIRCLE_RADIUS); // Calculating column based on column width
         column = (column >= COLUMNS) ? COLUMNS - 1 : column; // limiting to last column
-        selectColumn(column);
+        if(isHuman && inputEnabled) selectColumn(column);
     }
     
     /**
@@ -264,19 +277,23 @@ public class Connect4View extends Application implements Observer{
         if(controller.isColumnFull(column)){  
             showAlert(AlertType.ERROR, "Column full, pick somewhere else!");
         }else { // Processing turn TODO need to
-            
-            //TODO update after controller methods are implemented
-            
-            /* Non-network game */
+           
+           
             inputEnabled = false;
             controller.humanTurn(column);           
             
             
-            // Computer turn
+            //TODO need to send message through connection and wait on message back
+            
+            
+            /* Non-network game */
+            // Computer turn 
             if(!controller.isGameOver()) {
                 while(!controller.computerTurn());
-                inputEnabled = true;     //look at possible Platform.runLater when using threads
+                inputEnabled = true;     
             }
+            
+            /* *************** */
         }
         
     }
