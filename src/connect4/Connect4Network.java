@@ -1,10 +1,12 @@
 package connect4;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * This class encapsulates the network functions of the Connect4 program.
@@ -59,8 +61,7 @@ public class Connect4Network {
      */
     private boolean startServer(int port) {
         boolean hasNoException = true;
-        try {
-            ServerSocket serverSocket = new ServerSocket(port);
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             connection = serverSocket.accept();
             output = new ObjectOutputStream(connection.getOutputStream());
             input = new ObjectInputStream(connection.getInputStream());
@@ -123,7 +124,8 @@ public class Connect4Network {
      */
     public boolean closeConnection() {
         boolean hasNoException = true;
-        try {
+        try { 
+        	
             if(connection != null)
                 connection.close();
             else {
@@ -187,13 +189,18 @@ public class Connect4Network {
             message = (Connect4MoveMessage) input.readObject();
             errorMessage = "No error message.";
             System.out.println("reading message!");
+        } catch(SocketException | EOFException e) {
+            errorMessage = "Connection Closed.";
+            System.out.println(errorMessage);
+            closeConnection();
+            //e.printStackTrace(); 
         }catch(IOException e) {
             errorMessage = "IOException occured while trying to read message.";
-            System.out.println("IOException occured while trying to read message.");
+            System.out.println(errorMessage);
             e.printStackTrace();
         }catch(ClassNotFoundException e) {
             errorMessage = "ClassNotFoundException occured while trying to read message.";
-            System.out.println("ClassNotFoundException occured while trying to read message.");
+            System.out.println(errorMessage);
             e.printStackTrace();
         }
         return message;

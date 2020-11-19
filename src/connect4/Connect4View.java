@@ -21,6 +21,8 @@ import javafx.scene.control.Alert.AlertType;
  * </p>
  * 
  * @author Kristopher Rangel
+ * 
+ * @author Caroline O'Neill (integrating multi-threading from controller)
  *
  */
 public class Connect4View extends Application implements Observer{
@@ -40,7 +42,6 @@ public class Connect4View extends Application implements Observer{
     private MenuBar menuBar;
     private Connect4Controller controller;
     private Connect4MoveMessage message;
-    Connect4Network network;
     
     private boolean isGameOver;
     private boolean inputEnabled;
@@ -121,7 +122,7 @@ public class Connect4View extends Application implements Observer{
      */
     public void stop() {
         //Network cleanup 
-        network.closeConnection();
+        controller.closeNetwork();
     }
     
     /**
@@ -175,77 +176,31 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     private void startNewGame() {
-        controller = new Connect4Controller();
-        controller.setModelObserver(this);
-        createCircles();
-        
-        /* Network setup (maybe move Network management to controller?) */
-          network = new Connect4Network(isServer, server, port);
-          boolean hasConnectionError = network.getStartError(); 
-          if(hasConnectionError) {
-              showAlert(AlertType.ERROR, network.getErrorMessage());
-          }else {
-              if(isServer) {
-                  color = Connect4MoveMessage.YELLOW;
-                  stage.setTitle("Connect4 (Server)");
-                  inputEnabled = true;
-              }else {
-                  color = Connect4MoveMessage.RED;
-                  stage.setTitle("Connect4 (Client)");
-                  inputEnabled = false;
-              }
-          }
-         
-        /* ************************************************************* */
-          play();
-    }
-
-    private void play() {
-        //TODO need to implement a thread for network activities
-        if(isServer) {
-            if(!inputEnabled) {
-                waitForMessage();
-                controller.humanTurn(message.getColor(), message.getColumn());
-                inputEnabled = true;
-            }else {
-                if(isHuman && inputEnabled) { // player turn
-            
-                // waiting for mouse input  
-                } else if(!isHuman && inputEnabled) { // computer turn
-                    while(!controller.computerTurn(color));
+    	controller = new Connect4Controller();
+    	controller.setModelObserver(this);
+    	createCircles();
+          
+        boolean hasConnectionError = controller.buildNetwork(isServer, server, port);
+        if(hasConnectionError) {
+        	showAlert(AlertType.ERROR, controller.getNetworkBuildError());
+        } else {
+        	if(isServer) {
+        		color = Connect4MoveMessage.YELLOW;
+                stage.setTitle("Connect4 (Server)");
+                inputEnabled = true; // server takes first turn
+                if (!isHuman)
+                {
+                	// initiate computerTurn
+                	controller.computerTurn(this.color);
                 }
-            }
-        }else { // is a client
-            if(!inputEnabled) {
-                waitForMessage();
-                controller.humanTurn(message.getColor(), message.getColumn());
-                inputEnabled = true;
-            }else { // input is enabled
-
-                if(isHuman) { // player turn
-                    // waiting for mouse input
-                } else if(!isHuman){ // computer turn
-                    while(!controller.computerTurn(color));
-                }
+        	} else {
+                color = Connect4MoveMessage.RED;
+                stage.setTitle("Connect4 (Client)");
+                inputEnabled = false; // client waits for server
+                controller.initiateListening();
             }
         }
-
     }
-
-    
-    private void waitForMessage() {
-        //TODO get message
-        message = network.readMessage();
-        
-        System.out.printf("read msg error: %s\n", network.getErrorMessage());
-        System.out.printf("Message read: Row: %d, Col: %d, Color: %d\n", message.getRow(), message.getColumn(), message.getColor());
-        //TODO use message to update board
-        //controller.humanTurn(message.getColor(), message.getColumn());
-        //inputEnabled = true;
-        
-        //TODO call play()
-    }
-    
 
     /**
      * <ul><b><i>initBoard</i></b></ul>
@@ -308,9 +263,7 @@ public class Connect4View extends Application implements Observer{
         if(controller.isColumnFull(column)){  
             showAlert(AlertType.ERROR, "Column full, pick somewhere else!");
         }else { // Processing turn
-           controller.humanTurn(color, column); 
-            // message is sent through update()
-                       
+           controller.humanTurn(color, column);                      
         }
         
     }
@@ -344,14 +297,20 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     private void checkGameOver() {
-        System.out.println("Checking for game over");
+        //System.out.println("Checking for game over");
         isGameOver = controller.isGameOver();
         if(isGameOver){
-            System.out.println("Is game over");
+            //System.out.println("Is game over");
             String msg = "empty message";
             
-            if(controller.getWinner() == Connect4MoveMessage.YELLOW) { msg = "You won!"; }
-            else if(controller.getWinner() == Connect4MoveMessage.RED) { msg = "You lost!"; }
+            int otherPlayerColor = Connect4MoveMessage.RED;
+            if (this.color == Connect4MoveMessage.RED)
+            	otherPlayerColor = Connect4MoveMessage.YELLOW;
+     
+            	
+            
+            if(controller.getWinner() == this.color) { msg = "You won!"; }
+            else if(controller.getWinner() == otherPlayerColor) { msg = "You lost!"; }
             else { msg = "It's a tie!"; }
             
             inputEnabled = false;
@@ -393,11 +352,20 @@ public class Connect4View extends Application implements Observer{
         c.fillProperty().set(paint);
         //System.out.printf("Updating color of row: %d, col: %d\n", row, col);
         
-        if(inputEnabled) { // the move originated from this program
-            network.writeMessage(message); // sending it to connected program
-            inputEnabled = false;
-        }
         checkGameOver();
+        
+        // switch inputEnabled on/off
+        if (inputEnabled)
+        	inputEnabled = false;
+        else
+        {
+        	inputEnabled = true;
+        	if (!isHuman && !controller.isGameOver())
+        	{
+        		// initiate computerTurn
+            	controller.computerTurn(this.color);
+        	}
+        }        
     }
     
 }
