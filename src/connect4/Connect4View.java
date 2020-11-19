@@ -201,23 +201,32 @@ public class Connect4View extends Application implements Observer{
     }
 
     private void play() {
- 
-        if(!inputEnabled) waitForMessage();
-
+        //TODO need to implement a thread for network activities
         if(isServer) {
-            if(isHuman && inputEnabled) { // player turn
-                // waiting for mouse input  
-            } else if(!isHuman && inputEnabled) { // computer turn
-                while(!controller.computerTurn(color));
-            }
+            if(!inputEnabled) {
+                waitForMessage();
+                controller.humanTurn(message.getColor(), message.getColumn());
+                inputEnabled = true;
+            }else {
+                if(isHuman && inputEnabled) { // player turn
             
+                // waiting for mouse input  
+                } else if(!isHuman && inputEnabled) { // computer turn
+                    while(!controller.computerTurn(color));
+                }
+            }
         }else { // is a client
-            //waitForMessage();
+            if(!inputEnabled) {
+                waitForMessage();
+                controller.humanTurn(message.getColor(), message.getColumn());
+                inputEnabled = true;
+            }else { // input is enabled
 
-            if(isHuman && inputEnabled) { // player turn
-                // waiting for mouse input
-            } else if(!isHuman && inputEnabled){ // computer turn
-                while(!controller.computerTurn(color));
+                if(isHuman) { // player turn
+                    // waiting for mouse input
+                } else if(!isHuman){ // computer turn
+                    while(!controller.computerTurn(color));
+                }
             }
         }
 
@@ -227,11 +236,12 @@ public class Connect4View extends Application implements Observer{
     private void waitForMessage() {
         //TODO get message
         message = network.readMessage();
+        
         System.out.printf("read msg error: %s\n", network.getErrorMessage());
         System.out.printf("Message read: Row: %d, Col: %d, Color: %d\n", message.getRow(), message.getColumn(), message.getColor());
         //TODO use message to update board
-        controller.humanTurn(message.getColor(), message.getColumn());
-        inputEnabled = true;
+        //controller.humanTurn(message.getColor(), message.getColumn());
+        //inputEnabled = true;
         
         //TODO call play()
     }
@@ -274,6 +284,7 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     private void onClick(double xCoord) {
+        
         if(isHuman && inputEnabled) {
             int position = (int) Math.ceil(xCoord); // Rounding up decimal to nearest integer
             int column = (position - 5) / (HGAP_PADDING + 2 * CIRCLE_RADIUS); // Calculating column based on column width
@@ -296,7 +307,7 @@ public class Connect4View extends Application implements Observer{
         
         if(controller.isColumnFull(column)){  
             showAlert(AlertType.ERROR, "Column full, pick somewhere else!");
-        }else { // Processing turn TODO need to
+        }else { // Processing turn
            controller.humanTurn(color, column); 
             // message is sent through update()
                        
@@ -387,6 +398,6 @@ public class Connect4View extends Application implements Observer{
             inputEnabled = false;
         }
         checkGameOver();
-
     }
+    
 }
