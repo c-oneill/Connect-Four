@@ -156,6 +156,7 @@ public class Connect4Network {
      */
     public boolean writeMessage(Connect4MoveMessage message) {
         boolean hasNoException = true;
+        errorMessage = "No error occurred";
         try {
             output.writeObject(message);
             System.out.println("writing message!");
@@ -181,7 +182,7 @@ public class Connect4Network {
      */
     public Connect4MoveMessage readMessage() {
         Connect4MoveMessage message = null;
-        errorMessage = "No message exists.";
+        errorMessage = "No error occurred.";
         try {
             message = (Connect4MoveMessage) input.readObject();
             errorMessage = "No error message.";

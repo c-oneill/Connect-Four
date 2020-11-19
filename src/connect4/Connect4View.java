@@ -40,7 +40,9 @@ public class Connect4View extends Application implements Observer{
     private MenuBar menuBar;
     private Connect4Controller controller;
     private Connect4MoveMessage message;
-
+    Connect4Network network;
+    
+    private boolean isGameOver;
     private boolean inputEnabled;
     private String server;
     private int port;
@@ -119,7 +121,7 @@ public class Connect4View extends Application implements Observer{
      */
     public void stop() {
         //Network cleanup 
-        //TODO closeConnection();
+        network.closeConnection();
     }
     
     /**
@@ -178,7 +180,7 @@ public class Connect4View extends Application implements Observer{
         createCircles();
         
         /* Network setup (maybe move Network management to controller?) */
-          Connect4Network network = new Connect4Network(isServer, server, port);
+          network = new Connect4Network(isServer, server, port);
           boolean hasConnectionError = network.getStartError(); 
           if(hasConnectionError) {
               showAlert(AlertType.ERROR, network.getErrorMessage());
@@ -186,6 +188,7 @@ public class Connect4View extends Application implements Observer{
               if(isServer) {
                   color = Connect4MoveMessage.YELLOW;
                   stage.setTitle("Connect4 (Server)");
+                  inputEnabled = true;
               }else {
                   color = Connect4MoveMessage.RED;
                   stage.setTitle("Connect4 (Client)");
@@ -194,28 +197,43 @@ public class Connect4View extends Application implements Observer{
           }
          
         /* ************************************************************* */
-        
-        
-        play();
+          play();
     }
-    
+
     private void play() {
+ 
+        if(!inputEnabled) waitForMessage();
+
         if(isServer) {
             if(isHuman && inputEnabled) { // player turn
                 // waiting for mouse input  
             } else if(!isHuman && inputEnabled) { // computer turn
-                inputEnabled = false;
                 while(!controller.computerTurn(color));
             }
             
         }else { // is a client
+            //waitForMessage();
+
             if(isHuman && inputEnabled) { // player turn
                 // waiting for mouse input
             } else if(!isHuman && inputEnabled){ // computer turn
-                inputEnabled = false;
                 while(!controller.computerTurn(color));
             }
         }
+
+    }
+
+    
+    private void waitForMessage() {
+        //TODO get message
+        message = network.readMessage();
+        System.out.printf("read msg error: %s\n", network.getErrorMessage());
+        System.out.printf("Message read: Row: %d, Col: %d, Color: %d\n", message.getRow(), message.getColumn(), message.getColor());
+        //TODO use message to update board
+        controller.humanTurn(message.getColor(), message.getColumn());
+        inputEnabled = true;
+        
+        //TODO call play()
     }
     
 
@@ -256,10 +274,12 @@ public class Connect4View extends Application implements Observer{
      * @author Kristopher Rangel
      */
     private void onClick(double xCoord) {
-        int position = (int) Math.ceil(xCoord); // Rounding up decimal to nearest integer
-        int column = (position - 5) / (HGAP_PADDING + 2 * CIRCLE_RADIUS); // Calculating column based on column width
-        column = (column >= COLUMNS) ? COLUMNS - 1 : column; // limiting to last column
-        if(isHuman && inputEnabled) selectColumn(column);
+        if(isHuman && inputEnabled) {
+            int position = (int) Math.ceil(xCoord); // Rounding up decimal to nearest integer
+            int column = (position - 5) / (HGAP_PADDING + 2 * CIRCLE_RADIUS); // Calculating column based on column width
+            column = (column >= COLUMNS) ? COLUMNS - 1 : column; // limiting to last column
+            selectColumn(column);
+        }
     }
     
     /**
@@ -277,26 +297,13 @@ public class Connect4View extends Application implements Observer{
         if(controller.isColumnFull(column)){  
             showAlert(AlertType.ERROR, "Column full, pick somewhere else!");
         }else { // Processing turn TODO need to
-           
-           
-            inputEnabled = false;
-            controller.humanTurn(column);           
-            
-            
-            //TODO need to send message through connection and wait on message back
-            
-            
-            /* Non-network game */
-            // Computer turn 
-            if(!controller.isGameOver()) {
-                while(!controller.computerTurn());
-                inputEnabled = true;     
-            }
-            
-            /* *************** */
+           controller.humanTurn(color, column); 
+            // message is sent through update()
+                       
         }
         
     }
+
     
     /**
      * <ul><b><i>createCircles</i></b></ul>
@@ -327,7 +334,8 @@ public class Connect4View extends Application implements Observer{
      */
     private void checkGameOver() {
         System.out.println("Checking for game over");
-        if(controller.isGameOver()){
+        isGameOver = controller.isGameOver();
+        if(isGameOver){
             System.out.println("Is game over");
             String msg = "empty message";
             
@@ -360,7 +368,7 @@ public class Connect4View extends Application implements Observer{
      */
     public void update(Observable o, Object arg) {
         message = (Connect4MoveMessage) arg;
-
+ 
         int row = message.getRow();
         int col = message.getColumn();
         int color = message.getColor();
@@ -372,7 +380,13 @@ public class Connect4View extends Application implements Observer{
         
         Circle c = (Circle) board.getChildren().get(index);
         c.fillProperty().set(paint);
-        System.out.printf("Updating color of row: %d, col: %d\n", row, col);
+        //System.out.printf("Updating color of row: %d, col: %d\n", row, col);
+        
+        if(inputEnabled) { // the move originated from this program
+            network.writeMessage(message); // sending it to connected program
+            inputEnabled = false;
+        }
         checkGameOver();
+
     }
 }

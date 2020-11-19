@@ -1,12 +1,14 @@
 package connect4;
 
+import java.io.Serializable;
+
 /**
  * Connect4MoveMessage Class.
  * 
  * Code specified in program requirements.
  *
  */
-public class Connect4MoveMessage {
+public class Connect4MoveMessage implements Serializable{
     public static int YELLOW = 1;
     public static int RED = 2;
     
