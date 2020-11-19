@@ -174,8 +174,7 @@ public class Connect4Controller
     	// send message
     	Connect4MoveMessage sendMessage = new Connect4MoveMessage(row, col, color);
     	network.writeMessage(sendMessage);
-    	System.out.println("DEBUG2");
-    	System.out.println(row + " " + col + " " + color);
+    	
     	// create new Thread: recieve message --> update model --> updates view
     	Thread recvThread = new Thread(() -> 
     	{
