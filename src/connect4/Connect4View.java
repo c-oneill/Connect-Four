@@ -224,7 +224,7 @@ public class Connect4View extends Application implements Observer{
         board.setVgap(VGAP_PADDING);
         board.setPadding(new Insets(INSETS_PADDING, INSETS_PADDING, INSETS_PADDING, INSETS_PADDING));
         board.setAlignment(Pos.CENTER);
-        board.setOnMouseClicked(e -> { if(inputEnabled) onClick(e.getX()); } );
+        board.setOnMouseClicked(e -> { if(inputEnabled && !controller.isGameOver()) onClick(e.getX()); else e.consume(); } );
     }
     
     /**
