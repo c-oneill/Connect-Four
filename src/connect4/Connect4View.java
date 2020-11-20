@@ -40,7 +40,6 @@ public class Connect4View extends Application implements Observer{
     private GridPane board;
     private MenuBar menuBar;
     private Connect4Controller controller;
-    private Connect4MoveMessage message;
     
     private boolean isGameOver;
     private boolean inputEnabled;
@@ -58,7 +57,7 @@ public class Connect4View extends Application implements Observer{
      * The main entry point for all JavaFX applications.The start method is called after 
      * the init method has returned,and after the system is ready for the application to begin running. 
      *
-     * @param stage - the primary stage for this application, onto whichthe application scene can be set.
+     * @param stage - the primary stage for this application, onto which the application scene can be set.
      * 
      * @author Kristopher Rangel
      */
@@ -339,7 +338,7 @@ public class Connect4View extends Application implements Observer{
      * @author Caroline O'Neill
      */
     public void update(Observable o, Object arg) {
-        message = (Connect4MoveMessage) arg;
+        Connect4MoveMessage message = (Connect4MoveMessage) arg;
  
         int row = message.getRow();
         int col = message.getColumn();
