@@ -119,7 +119,7 @@ public class Connect4View extends Application implements Observer{
         //Network cleanup 
         boolean closedWithoutError = controller.closeNetwork();
         if(!closedWithoutError)
-            showAlert(AlertType.ERROR, controller.getNetworkError());
+            showAlert(AlertType.ERROR, "Error closing connnection:" + controller.getNetworkError());
     }
     
     /**
