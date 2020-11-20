@@ -366,7 +366,7 @@ public class Connect4View extends Application implements Observer{
         	if (!isHuman && !controller.isGameOver())
         	{
         		// initiate computerTurn
-            	controller.computerTurn(this.color);
+            	while(!controller.computerTurn(this.color));
         	}
         }        
     }
