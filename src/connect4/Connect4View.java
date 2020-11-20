@@ -35,16 +35,12 @@ public class Connect4View extends Application implements Observer{
     private final int ROWS = 6;
 
     private Stage stage;
-    private Scene scene;
     private VBox window;
     private GridPane board;
     private MenuBar menuBar;
     private Connect4Controller controller;
     
-    private boolean isGameOver;
     private boolean inputEnabled;
-    private String server;
-    private int port;
     private boolean isServer;
     private boolean isHuman;
     private int color;
@@ -66,7 +62,7 @@ public class Connect4View extends Application implements Observer{
 
         controller = new Connect4Controller();
         controller.setModelObserver(this);
-        scene = new Scene(window);
+        Scene scene = new Scene(window);
         
         // Showing stage
         try {
@@ -80,6 +76,7 @@ public class Connect4View extends Application implements Observer{
             this.stage = stage;
 
         }catch(Exception e) {
+            System.out.println("Error with javafx while initializing the UI.");
             e.printStackTrace();
         }
         
@@ -157,26 +154,29 @@ public class Connect4View extends Application implements Observer{
         if(ns.userHitOK()) { // user hit okay to start new game
             
             // Getting user options
-            server = ns.getServer();
-            port = ns.getPort();
+            String server = ns.getServer();
+            int port = ns.getPort();
             isHuman = ns.getPlayAsSelection();
             isServer = ns.getCreateModeSelection();
             
-            startNewGame();
+            startNewGame(server, port);
         }
  
     }
     
     /**
      * <ul><b><i>startNewGame</i></b></ul>
-     * <ul><ul><p><code>private void startNewGame () </code></p></ul>
+     * <ul><ul><p><code>private void startNewGame (String server, int port) </code></p></ul>
      *
      * This function starts a new game with the options selected by the user.
+     *
+     * @param server - the hostname of the server
+     * @param port - the port number
      *
      * @author Kristopher Rangel
      * @author Caroline O'Neill
      */
-    private void startNewGame() {
+    private void startNewGame(String server, int port) {
     	controller = new Connect4Controller();
     	controller.setModelObserver(this);
     	createCircles();
@@ -299,7 +299,7 @@ public class Connect4View extends Application implements Observer{
      * @author Caroline O'Neill
      */
     private void checkGameOver() {
-        isGameOver = controller.isGameOver();
+        boolean isGameOver = controller.isGameOver();
         if(isGameOver){
             String msg = "empty message";
             
