@@ -220,7 +220,7 @@ public class Connect4Controller
     
     /**
      * <ul><b><i>setModelObserver</i></b></ul>
-     * <ul><ul><p><code> void setModelObserver () </code></p></ul>
+     * <ul><ul><p><code>public void setModelObserver (Connect4View view) </code></p></ul>
      *
      * Adds a {@link Connect4View} as an observer of the {@link Connect4Model}.
      *

@@ -203,7 +203,7 @@ public class Connect4Network {
     
     /**
      * <ul><b><i>getStartError</i></b></ul>
-     * <ul><ul><p><code> boolean getStartError () </code></p></ul>
+     * <ul><ul><p><code>public boolean getStartError () </code></p></ul>
      *
      * Returns error status of network startup.
      *
@@ -215,7 +215,7 @@ public class Connect4Network {
     
     /**
      * <ul><b><i>getErrorMessage</i></b></ul>
-     * <ul><ul><p><code> String getErrorMessage () </code></p></ul>
+     * <ul><ul><p><code>public String getErrorMessage () </code></p></ul>
      *
      * Returns the network error message associated with the last network error.
      *
