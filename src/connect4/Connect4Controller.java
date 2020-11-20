@@ -50,14 +50,19 @@ public class Connect4Controller
      * Gets the error message associated with starting up the network.
      * @return error message
      */
-    public String getNetworkBuildError()
+    public String getNetworkError()
     {
     	return network.getErrorMessage();
     }
     
-    public void closeNetwork()
+    
+    /**
+     * Closes the network connection.
+     * @return true if there was no error closing connection, false otherwise
+     */
+    public boolean closeNetwork()
     {
-    	network.closeConnection();
+    	return network.closeConnection();
     }
     
     /**

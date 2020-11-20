@@ -17,7 +17,6 @@ import javafx.scene.control.Alert.AlertType;
  * This class serves as the UI for the Connect4 program.
  * 
  * <p>This class is an {@link Observer} of the {@link Connect4Model} class.
- * 
  * </p>
  * 
  * @author Kristopher Rangel
@@ -122,7 +121,9 @@ public class Connect4View extends Application implements Observer{
      */
     public void stop() {
         //Network cleanup 
-        controller.closeNetwork();
+        boolean closedWithoutError = controller.closeNetwork();
+        if(!closedWithoutError)
+            showAlert(AlertType.ERROR, controller.getNetworkError());
     }
     
     /**
@@ -174,6 +175,7 @@ public class Connect4View extends Application implements Observer{
      * This function starts a new game with the options selected by the user.
      *
      * @author Kristopher Rangel
+     * @author Caroline O'Neill
      */
     private void startNewGame() {
     	controller = new Connect4Controller();
@@ -182,7 +184,7 @@ public class Connect4View extends Application implements Observer{
           
         boolean hasConnectionError = controller.buildNetwork(isServer, server, port);
         if(hasConnectionError) {
-        	showAlert(AlertType.ERROR, controller.getNetworkBuildError());
+        	showAlert(AlertType.ERROR, controller.getNetworkError());
         } else {
         	if(isServer) {
         		color = Connect4MoveMessage.YELLOW;
@@ -295,12 +297,11 @@ public class Connect4View extends Application implements Observer{
      * and displays an alert box in that event.
      *
      * @author Kristopher Rangel
+     * @author Caroline O'Neill
      */
     private void checkGameOver() {
-        //System.out.println("Checking for game over");
         isGameOver = controller.isGameOver();
         if(isGameOver){
-            //System.out.println("Is game over");
             String msg = "empty message";
             
             int otherPlayerColor = Connect4MoveMessage.RED;
@@ -335,6 +336,7 @@ public class Connect4View extends Application implements Observer{
      * @param arg - a {@link Connect4MoveMessage} with information related to the move
      * 
      * @author Kristopher Rangel 
+     * @author Caroline O'Neill
      */
     public void update(Observable o, Object arg) {
         message = (Connect4MoveMessage) arg;
@@ -350,7 +352,6 @@ public class Connect4View extends Application implements Observer{
         
         Circle c = (Circle) board.getChildren().get(index);
         c.fillProperty().set(paint);
-        //System.out.printf("Updating color of row: %d, col: %d\n", row, col);
         
         checkGameOver();
         

@@ -11,16 +11,23 @@ import java.net.SocketException;
 /**
  * This class encapsulates the network functions of the Connect4 program.
  * 
+ * <p>Functions include starting a network connection as a server or client, 
+ * sending and receiving a {@link Connect4MoveMessage} between connected a
+ * connected server or client, and closing the network connection.</p>
+ * <p>Additionally error information can be retrieved in the by invoking the
+ * {@link #getErrorMessage()} method.</p>
+ * 
  * @author Kristopher Rangel
  *
  */
 public class Connect4Network {
+    
     private Socket connection;
     private ObjectOutputStream output;
     private ObjectInputStream input;
     
-    private boolean startedWithoutError;
-    private String errorMessage;
+    private boolean startedWithoutError; // true if connection started without error
+    private String errorMessage; // error message associated with the last error occurring
     
     /**
      * Constructor.
@@ -69,8 +76,6 @@ public class Connect4Network {
         }catch(IOException e) {
             hasNoException = false;
             errorMessage = "IOException occurred while trying to establish server.";
-            System.out.println("IOException occurred while trying to establish server.");
-            e.printStackTrace();
         }
         return hasNoException;
     }
@@ -102,8 +107,6 @@ public class Connect4Network {
         }catch(IOException e) {
             hasNoException = false;
             errorMessage = "IOException occurred while trying to establish connection to server.";
-            System.out.println("IOException occurred while trying to establish connection to server.");
-            e.printStackTrace();
         }
         return hasNoException;
     }
@@ -131,13 +134,11 @@ public class Connect4Network {
             else {
                 hasNoException = false;
                 errorMessage = "Attempted to close a null connection.";
-                System.out.println("Attempted to close a null connection.");
             }
                 
         }catch(IOException e) {
+            hasNoException = false;
             errorMessage = "IOException occurred while trying to close connection.";
-            System.out.println("IOException occurred while trying to close connection.");
-            e.printStackTrace();
         }
         return hasNoException;
     }
@@ -155,18 +156,16 @@ public class Connect4Network {
      * @param message - the {@link Connect4MoveMessage} to transmit
      * @return true if no exception, false otherwise
      * 
+     * @author Kristopher Rangel
      */
     public boolean writeMessage(Connect4MoveMessage message) {
         boolean hasNoException = true;
         errorMessage = "No error occurred";
         try {
             output.writeObject(message);
-            System.out.println("writing message!");
         }catch(IOException e) {
             hasNoException = false;
             errorMessage = "IOException occured while writing message.";
-            System.out.println("IOException occured while writing message.");
-            e.printStackTrace();
         }
         return hasNoException;
     }
@@ -181,6 +180,9 @@ public class Connect4Network {
      * In that event, the error message can be retrieved by invoking {@link #getErrorMessage()}.
      *
      * @return - the <code>Connect4MoveMessage</code> read, or null if an exception occurred or no input exists
+     * 
+     * @author Kristopher Rangel
+     * @author Caroline O'Neill
      */
     public Connect4MoveMessage readMessage() {
         Connect4MoveMessage message = null;
@@ -188,24 +190,36 @@ public class Connect4Network {
         try {
             message = (Connect4MoveMessage) input.readObject();
             errorMessage = "No error message.";
-            System.out.println("reading message!");
         } catch(SocketException | EOFException e) {
             errorMessage = "Connection Closed.";
-            System.out.println(errorMessage);
             closeConnection();
-            //e.printStackTrace(); 
         }catch(IOException e) {
             errorMessage = "IOException occured while trying to read message.";
-            System.out.println(errorMessage);
-            e.printStackTrace();
         }catch(ClassNotFoundException e) {
             errorMessage = "ClassNotFoundException occured while trying to read message.";
-            System.out.println(errorMessage);
-            e.printStackTrace();
         }
         return message;
     }
     
+    /**
+     * <ul><b><i>getStartError</i></b></ul>
+     * <ul><ul><p><code> boolean getStartError () </code></p></ul>
+     *
+     * Returns error status of network startup.
+     *
+     * @return True if there was an error during startup, false otherwise
+     * 
+     * @author Kristopher Rangel
+     */
     public boolean getStartError() { return !startedWithoutError; }
+    
+    /**
+     * <ul><b><i>getErrorMessage</i></b></ul>
+     * <ul><ul><p><code> String getErrorMessage () </code></p></ul>
+     *
+     * Returns the network error message associated with the last network error.
+     *
+     * @return a <code>String</code> representing the message associated with the last occurring network error.
+     */
     public String getErrorMessage() { return errorMessage; }
 }
