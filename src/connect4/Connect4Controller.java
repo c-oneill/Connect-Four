@@ -25,6 +25,7 @@ public class Connect4Controller
      */
     public Connect4Controller()
     {
+        network = null;
         model = new Connect4Model();
         nextOpen = new int[Connect4Model.COLUMNS];
         for (int i = 0; i < nextOpen.length; i++)
@@ -51,8 +52,10 @@ public class Connect4Controller
      * @return error message
      */
     public String getNetworkError()
-    {
-    	return network.getErrorMessage();
+    {   String errorMessage = "No network established.";
+        if(network != null)
+            errorMessage =  network.getErrorMessage();
+        return errorMessage;
     }
     
     
@@ -61,8 +64,10 @@ public class Connect4Controller
      * @return true if there was no error closing connection, false otherwise
      */
     public boolean closeNetwork()
-    {
-    	return network.closeConnection();
+    {   boolean result = false;
+        if(network != null)
+            result = network.closeConnection();
+    	return result;
     }
     
     /**
