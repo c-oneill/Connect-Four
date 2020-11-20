@@ -45,7 +45,6 @@ public class Connect4View extends Application implements Observer{
     private boolean isHuman;
     private int color;
     
-    
     /**
      * <ul><b><i>start</i></b></ul>
      * <ul><ul><p><code>public void start (Stage stage) </code></p></ul>
@@ -60,13 +59,11 @@ public class Connect4View extends Application implements Observer{
     @Override
     public void start(Stage stage) {
 
-        controller = new Connect4Controller();
-        controller.setModelObserver(this);
         Scene scene = new Scene(window);
         
         // Showing stage
         try {
-            inputEnabled = true;
+            inputEnabled = false;
             
             // setting the stage
             stage.setTitle("Connect4");
@@ -99,11 +96,7 @@ public class Connect4View extends Application implements Observer{
         createCircles();
         initMenuBar();
         this.window = new VBox(menuBar, board);
-        
-        // default to human player server
-        this.isServer = true;
-        this.isHuman = true;
-        
+             
     }
     
     /**
