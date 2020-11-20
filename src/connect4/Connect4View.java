@@ -110,9 +110,11 @@ public class Connect4View extends Application implements Observer{
      */
     public void stop() {
         //Network cleanup 
-        boolean closedWithoutError = controller.closeNetwork();
-        if(!closedWithoutError)
-            showAlert(AlertType.ERROR, "Error closing connnection:" + controller.getNetworkError());
+        if(controller != null) {
+            boolean closedWithoutError = controller.closeNetwork();
+            if(!closedWithoutError)
+                showAlert(AlertType.ERROR, "Error closing connnection:" + controller.getNetworkError());
+        }
     }
     
     /**
@@ -143,7 +145,10 @@ public class Connect4View extends Application implements Observer{
      */
     private void getNewGameOptions() {
         Connect4NetworkSetup ns = new Connect4NetworkSetup();
+        ns.setX(stage.getX());
+        ns.setY(stage.getY());
         ns.showAndWait();
+        
         if(ns.userHitOK()) { // user hit okay to start new game
             
             // Getting user options
@@ -316,6 +321,9 @@ public class Connect4View extends Application implements Observer{
     
     private void showAlert(AlertType type, String message) {
         Alert alert = new Alert(type, message);
+        // setting alert location to match stage location
+        alert.setX(stage.getX());
+        alert.setY(stage.getY());
         alert.showAndWait().filter(response -> response == ButtonType.OK);
     }
     
