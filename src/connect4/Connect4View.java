@@ -158,7 +158,7 @@ public class Connect4View extends Application implements Observer{
             int port = ns.getPort();
             isHuman = ns.getPlayAsSelection();
             isServer = ns.getCreateModeSelection();
-            
+
             startNewGame(server, port);
         }
  
@@ -177,10 +177,12 @@ public class Connect4View extends Application implements Observer{
      * @author Caroline O'Neill
      */
     private void startNewGame(String server, int port) {
+
     	controller = new Connect4Controller();
     	controller.setModelObserver(this);
     	createCircles();
-          
+        // if previous connection exists, closing
+        controller.closeNetwork();
         boolean hasConnectionError = controller.buildNetwork(isServer, server, port);
         if(hasConnectionError) {
         	showAlert(AlertType.ERROR, controller.getNetworkError());
