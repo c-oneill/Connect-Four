@@ -175,10 +175,9 @@ public class Connect4View extends Application implements Observer{
      * @author Caroline O'Neill
      */
     private void startNewGame(String server, int port) {
-
     	controller = new Connect4Controller();
     	controller.setModelObserver(this);
-    	createCircles();
+
         // if previous connection exists, closing
         controller.closeNetwork();
         boolean hasConnectionError = controller.buildNetwork(isServer, server, port);
@@ -316,14 +315,17 @@ public class Connect4View extends Application implements Observer{
             inputEnabled = false;
             
             showAlert(AlertType.INFORMATION, msg);
+            createCircles();
         }     
     }
     
     private void showAlert(AlertType type, String message) {
         Alert alert = new Alert(type, message);
         // setting alert location to match stage location
-        alert.setX(stage.getX());
-        alert.setY(stage.getY());
+        double x = stage.getX();
+        double y = stage.getY() + (ROWS * (CIRCLE_RADIUS + HGAP_PADDING) * 2);
+        alert.setX(x);
+        alert.setY(y);
         alert.showAndWait().filter(response -> response == ButtonType.OK);
     }
     
